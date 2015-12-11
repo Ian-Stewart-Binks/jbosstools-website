@@ -1,0 +1,309 @@
+[[hot-deploy-for-nodejs-applications-on-openshift]]
+Hot Deploy for Nodejs Applications on OpenShift
+-----------------------------------------------
+
+Developing Node.js applications on OpenShift just got much simpler.
+
+OpenShift's
+https://hub.docker.com/r/openshift/nodejs-010-centos7/[sti-nodejs]
+(https://github.com/openshift/sti-nodejs[Github Repo]) image has
+recently introduced _development mode_. The development mode's purpose
+is to enable features to help you develop the best possible Node.js
+application on OpenShift. One of the features that was introduced with
+development mode is _hot deploy_. This blog post will demonstrate how
+you can get the most out of this recently introduced feature.
+
+This blog post first shows you how to run a Node.js application on
+OpenShift using the sti-nodejs image, then how to run an app in
+development mode, and then shows you how to integrate the hot deploy
+feature, in tandem with `oc rsync`, with JavaScript command line tools
+like Grunt and Gulp.
+
+[[hot-deploy]]
+Hot Deploy?
+^^^^^^^^^^^
+
+So what is hot deploy? Hot deploy is a development process that lets the
+developer add new content or source code to a running application
+without having to restart the running application.
+
+[[running-a-node.js-application-on-openshift-using-the-sti-image]]
+Running a Node.js application on OpenShift using the STI image
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you're new to deploying Node.js applications on OpenShift, or are in
+need of a refresher, this section will bring you up to speed on how to
+do so. If you decide to skip right to the Grunt/Gulp section, make sure
+you set the development mode environment variable correctly during
+`oc run`, as specified in step 2.2.
+
+[[prerequisites]]
+0. Prerequisites
+++++++++++++++++
+
+* `s2i`, the
+https://github.com/openshift/source-to-image#installation[Source To
+Image command line tool]
+* `oc`, the https://github.com/openshift/origin/releases[OpenShift
+command line tool]
+* Access to an OpenShift instance. If you don't already have access, you
+can sign up for a 30-day free trial
+https://enterprise.openshift.com/trial.html[here].
+* https://docs.docker.com/engine/installation/[docker]
+
+[[build-your-image]]
+1. Build your image
++++++++++++++++++++
+
+[[building-the-image]]
+1.1 Building the image
+
+First, navigate to the top level directory of your Node.js application.
+Once you're there, run the following command:
+
+-------------------------------------------------
+$ s2i build . openshift/nodejs-010-centos7 my-app
+-------------------------------------------------
+
+This will produce a docker image with the name _my-app_ using the source
+code in the current directory.
+
+You can re-tag this image using the docker command:
+
+---------------------------------------
+$ docker tag my-app username/my-new-tag
+---------------------------------------
+
+[[make-it-accessible-through-a-docker-registry]]
+1.2 Make it accessible through a docker registry
+
+OpenShift needs some way of knowing where to locate your image. For
+example, you can upload your image on https://hub.docker.com/[Docker
+Hub], and OpenShift will know how to find it. This does require you to
+have an account on Docker Hub. Docker Hub accounts are free and straight
+forward to set up.
+
+[[deploying-on-openshift-through-the-command-line]]
+2. Deploying on OpenShift through the command line
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+[[login-to-openshift-via-the-cli]]
+2.1 Login to OpenShift via the CLI
+
+Make sure you have the `oc` binary listed in the prerequisites section.
+Login to OpenShift with the following command:
+
+----------
+$ oc login
+----------
+
+[[run-your-image-on-openshift]]
+2.2 Run your image on OpenShift
+
+Next, run the image you created in the _Building the image_ section with
+the command
+
+----------------------------------------------------
+$ oc run my-app --env=[DEV_MODE=true] --image=my-app
+----------------------------------------------------
+
+The `--env=[DEV_MODE=true]` option tells the docker image to run your
+application in development mode. If you changed the image tag when you
+created the image, make sure that you put in the correct image tag to
+the --image option.
+
+If the command was successful, you should be informed that the
+`deploymentconfig` "my-app" was created.
+
+[[get-your-pods-id]]
+2.3 Get your pod's ID
+
+You can view deployed pods on your OpenShift instance by running the
+following command:
+
+------------------
+$ oc describe pods
+------------------
+
+You should be able to see the pod in which your Node.js application is
+running. Figure out which pod is the one you just deployed (this is
+typically the most recently deployed pod, if you just ran the `oc run`
+command), and grab its pod ID. The pod ID will be useful in the next
+step.
+
+[[allow-users-to-access-your-application-through-the-web]]
+2.4 Allow users to access your application through the web
+
+Next, we want to be able to access the Node.js application through the
+browser. We can do this by exposing the pod through a service, and
+exposing that service through a route.
+
+To expose the pod through a service by running the command
+
+-------------------------------------------------------
+$ oc expose pod/pod-id --port=my-port --name=my-service
+-------------------------------------------------------
+
+Note that the pod-id should be the same as the pod ID that you retrieved
+in step 2.3. The port option should be changed to whatever port your
+server is listening on, for instance, 8080. You can also change the name
+of the service through the `--name` option.
+
+Once you have completed that, we then need to expose the service through
+the route. This can be achieved by running the command
+
+---------------------------------------------------------------------------
+$ oc expose service/my-service --hostname=my-app.url-name.openshiftapps.com
+---------------------------------------------------------------------------
+
+`my-service` should be replaced by the name of the service you want to
+expose. The webhost url should be the url that you want the user to
+query to access your application.
+
+[[using-oc-rsync-to-sync-up-local-changes]]
+Using oc rsync to sync up local changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+OpenShift provides a command to copy local files to an application
+running on OpenShift. This command is
+
+-------------------------------
+oc rsync <source> <destination>
+-------------------------------
+
+If you're familiar with the http://linux.die.net/man/1/rsync[`rsync`]
+command, `oc rsync` is just `rsync` tailored for OpenShift use.
+
+'''''
+
+All done! You should now be able to access your Node.js application by
+visiting its URL.
+
+[[example-use-of-oc-rsync]]
+Example use of oc rsync
++++++++++++++++++++++++
+
+Suppose you have your application running in a pod with the pod ID
+my-app, and suppose you're on the command line of your local machine and
+have already navigated to the root of the source code for your
+application. The following command will sync any locally updated files
+to the remote instance of your app:
+
+-------------------------------------
+$ oc rsync . my-app:/opt/app-root/src
+-------------------------------------
+
+The openshift/nodejs-010-centos7 image puts your source code in the
+directory _/opt/app-root/src_, so this directory mimics the root
+directory of your application's source code.
+
+If you've built your image with the updated nodejs-010-centos7 image and
+are running in development mode, the changes you've `oc rsync`'d to your
+remotely running application should appear instantly, thanks to the new
+hot deploy feature!
+
+[[integrating-with-grunt-and-gulp]]
+Integrating with Grunt and Gulp
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now that we can easily sync files up to a remotely running OpenShift
+instance, let's integrate this tool with some existing JavaScript
+command line tools to make development even simpler.
+
+We can use Grunt and Gulps _watch_ plugins to watch our application's
+source code directory to listen for any changes to our files, and then
+tell it to fire off a shell command (`oc rsync`) when it detects a
+change.
+
+[[using-grunt]]
+Using Grunt
++++++++++++
+
+Prerequisite installations:
+
+* grunt (`npm install grunt --save-dev`), we need Grunt `>=0.4.0`.
+* grunt-contrib-watch (`npm install grunt-contrib-watch --save-dev`)
+* grunt-shell (`npm install grunt-shell --save-dev`)
+
+Fantastic. Now, copy the following file and put it into a new
+_Gruntfile.js_, or just append it to/integrate it with your existing
+one.
+
+code,JavaScript--------------------------------------------------------------------------------------------
+code,JavaScript
+module.exports = function(grunt) {
+
+  grunt.initConfig({
+    shell: {
+      target: {
+        // For the oc rsync command to work, insert your pod id where POD-ID is.
+        // Note that if you're running multiple containers, you'll need to specify the
+        // right container with the -c flag. More information on how to do this can be found
+        // here: https://docs.openshift.org/latest/dev_guide/copy_files_to_container.html
+        command: "oc rsync . POD-ID:/opt/app-root/src"
+      }
+    },
+    watch: {
+      files: ['server.js'],
+      tasks: ['shell']
+    }
+  });
+  
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-shell');
+  grunt.registerTask('default', ['watch']);
+
+};
+--------------------------------------------------------------------------------------------
+
+Run the command:
+
+-----------
+$ grunt watch
+-----------
+
+[[using-gulp]]
+Using Gulp
+++++++++++
+
+Prerequisite installations:
+
+* gulp (`npm install gulp --save-dev`)
+* gulp-watch (`npm install gulp-watch --save-dev`)
+* gulp-shell (`npm install gulp-shell --save-dev`)
+
+Wonderful. Now, copy the following file and put it into a new
+_gulpfile.js_, or just append it to/integrate it with your existing one.
+
+code,JavaScript
+--------------------------------------------------------------------------------------
+var gulp  = require('gulp'),
+    watch = require('gulp-watch'),
+    shell = require('gulp-shell');
+
+// For the oc rsync command to work, insert your pod id where POD-ID is.
+// Note that if you're running multiple containers, you'll need to specify the
+// right container with the -c flag. More information on how to do this can be found
+// here: https://docs.openshift.org/latest/dev_guide/copy_files_to_container.html
+gulp.task('rsync', shell.task(['oc rsync . POD-ID:/opt/app-root/src']));
+
+gulp.task('watch', function() {
+  gulp.watch(['*.js'], ['rsync'])
+});
+--------------------------------------------------------------------------------------
+
+Run the command:
+
+------
+$ gulp watch
+------
+
+'''''
+
+And voila! Grunt/Gulp will now sync your local changes to your remote
+container any time Grunt/Gulp detects a change to your source code!
+
+[[section]]
+
+Next steps: something about what JBoss Tools is planning to do in the
+future.
