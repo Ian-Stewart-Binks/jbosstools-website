@@ -168,7 +168,7 @@ OpenShift provides a command to copy local files to an application
 running on OpenShift. This command is
 
 -------------------------------
-oc rsync <source> <destination>
+$ oc rsync <source> <destination>
 -------------------------------
 
 If you're familiar with the http://linux.die.net/man/1/rsync[`rsync`]
@@ -219,7 +219,7 @@ change.
 Using Grunt
 +++++++++++
 
-Prerequisite installations:
+Prerequisite  NPM installations:
 
 * grunt (`npm install grunt --save-dev`), we need Grunt `>=0.4.0`.
 * grunt-contrib-watch (`npm install grunt-contrib-watch --save-dev`)
@@ -229,7 +229,7 @@ Fantastic. Now, copy the following file and put it into a new
 _Gruntfile.js_, or just append it to/integrate it with your existing
 one.
 
-[code,JavaScript]
+[code, javascript]
 --------------------------------------------------------------------------------------------
 
 module.exports = function(grunt) {
@@ -249,7 +249,7 @@ module.exports = function(grunt) {
       tasks: ['shell']
     }
   });
-  
+
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
   grunt.registerTask('default', ['watch']);
@@ -267,7 +267,7 @@ $ grunt watch
 Using Gulp
 ++++++++++
 
-Prerequisite installations:
+Prerequisite NPM installations:
 
 * gulp (`npm install gulp --save-dev`)
 * gulp-watch (`npm install gulp-watch --save-dev`)
@@ -276,7 +276,7 @@ Prerequisite installations:
 Wonderful. Now, copy the following file and put it into a new
 _gulpfile.js_, or just append it to/integrate it with your existing one.
 
-[code,JavaScript]
+[code, javascript]
 --------------------------------------------------------------------------------------
 var gulp  = require('gulp'),
     watch = require('gulp-watch'),
@@ -304,7 +304,7 @@ $ gulp watch
 And voila! Grunt/Gulp will now sync your local changes to your remote
 container any time Grunt/Gulp detects a change to your source code!
 
-[[section]]
+'''''
 
 Next steps: something about what JBoss Tools is planning to do in the
 future.
