@@ -229,7 +229,7 @@ Fantastic. Now, copy the following file and put it into a new
 _Gruntfile.js_, or just append it to/integrate it with your existing
 one.
 
-code,JavaScript
+[code,JavaScript]
 --------------------------------------------------------------------------------------------
 
 module.exports = function(grunt) {
@@ -276,7 +276,7 @@ Prerequisite installations:
 Wonderful. Now, copy the following file and put it into a new
 _gulpfile.js_, or just append it to/integrate it with your existing one.
 
-code,JavaScript
+[code,JavaScript]
 --------------------------------------------------------------------------------------
 var gulp  = require('gulp'),
     watch = require('gulp-watch'),
