@@ -193,6 +193,8 @@ are running in development mode, the changes you've `oc rsync`'d to your
 remotely running application should appear instantly, thanks to the new
 hot deploy feature!
 
+If you want to learn more about `oc rsync`, you can visit the https://docs.openshift.org/latest/dev_guide/copy_files_to_container.html[official openshift oc rsync documentation].
+
 [[integrating-with-grunt-and-gulp]]
 Integrating with Grunt and Gulp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
