@@ -104,7 +104,7 @@ Next, run the image you created in the _Building the image_ section with
 the command
 
 ----------------------------------------------------
-$ oc run my-app --env=[DEV_MODE=true] --image=my-app
+$ oc run <my-app> --env=[DEV_MODE=true] --image=my-app
 ----------------------------------------------------
 
 The `--env=[DEV_MODE=true]` option tells the docker image to run your
@@ -116,36 +116,22 @@ If the command was successful, you should be informed that the
 `deploymentconfig` "my-app" was created.
 
 [[get-your-pods-id]]
-2.3 Get your pod's ID
-
-You can view deployed pods on your OpenShift instance by running the
-following command:
-
-------------------
-$ oc describe pods
-------------------
-
-You should be able to see the pod in which your Node.js application is
-running. Figure out which pod is the one you just deployed (this is
-typically the most recently deployed pod, if you just ran the `oc run`
-command), and grab its pod ID. The pod ID will be useful in the next
-step.
 
 [[allow-users-to-access-your-application-through-the-web]]
-2.4 Allow users to access your application through the web
+2.3 Allow users to access your application through the web
 
 Next, we want to be able to access the Node.js application through the
-browser. We can do this by exposing the pod through a service, and
+browser. We can do this by exposing the deployment configuration through a service, and
 exposing that service through a route.
 
 To expose the pod through a service by running the command
 
 -------------------------------------------------------
-$ oc expose pod/pod-id --port=my-port --name=my-service
+$ oc expose dc <deploymentconfig> --port=my-port --name=my-service
 -------------------------------------------------------
 
-Note that the pod-id should be the same as the pod ID that you retrieved
-in step 2.3. The port option should be changed to whatever port your
+Note that <deploymentconfig> should be replaced with the name you used in the `oc run` command.
+In the above example, the name would be 'my-app'. The port option should be changed to whatever port your
 server is listening on, for instance, 8080. You can also change the name
 of the service through the `--name` option.
 
@@ -153,11 +139,11 @@ Once you have completed that, we then need to expose the service through
 the route. This can be achieved by running the command
 
 ---------------------------------------------------------------------------
-$ oc expose service/my-service --hostname=my-app.url-name.openshiftapps.com
+$ oc expose service/<my-service> --hostname=<my-app.url-name.openshiftapps.com>
 ---------------------------------------------------------------------------
 
-`my-service` should be replaced by the name of the service you want to
-expose. The webhost url should be the url that you want the user to
+`<my-service>` should be replaced by the name of the service you want to
+expose. The hostname should be the url that you want the user to
 query to access your application.
 
 [[using-oc-rsync-to-sync-up-local-changes]]
