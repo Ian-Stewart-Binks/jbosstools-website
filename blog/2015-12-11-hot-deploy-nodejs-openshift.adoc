@@ -56,7 +56,7 @@ https://enterprise.openshift.com/trial.html[here].
 +++++++++++++++++++
 
 [[building-the-image]]
-1.1 Building the image
+===== 1.1 Building the image
 
 First, navigate to the top level directory of your Node.js application.
 Once you're there, run the following command:
@@ -75,7 +75,7 @@ $ docker tag my-app username/my-new-tag
 ---------------------------------------
 
 [[make-it-accessible-through-a-docker-registry]]
-1.2 Make it accessible through a docker registry
+===== 1.2 Make it accessible through a docker registry
 
 OpenShift needs some way of knowing where to locate your image. For
 example, you can upload your image on https://hub.docker.com/[Docker
@@ -88,7 +88,7 @@ forward to set up.
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
 [[login-to-openshift-via-the-cli]]
-2.1 Login to OpenShift via the CLI
+===== 2.1 Login to OpenShift via the CLI
 
 Make sure you have the `oc` binary listed in the prerequisites section.
 Login to OpenShift with the following command:
@@ -98,7 +98,7 @@ $ oc login
 ----------
 
 [[run-your-image-on-openshift]]
-2.2 Run your image on OpenShift
+===== 2.2 Run your image on OpenShift
 
 Next, run the image you created in the _Building the image_ section with
 the command
@@ -118,7 +118,7 @@ If the command was successful, you should be informed that the
 [[get-your-pods-id]]
 
 [[allow-users-to-access-your-application-through-the-web]]
-2.3 Allow users to access your application through the web
+===== 2.3 Allow users to access your application through the web
 
 Next, we want to be able to access the Node.js application through the
 browser. We can do this by exposing the deployment configuration through a service, and
@@ -146,6 +146,13 @@ $ oc expose service/<my-service> --hostname=<my-app.url-name.openshiftapps.com>
 expose. The hostname should be the url that you want the user to
 query to access your application.
 
+'''''
+
+All done! You should now be able to access your Node.js application by
+visiting its URL.
+
+:numbered!:
+
 [[using-oc-rsync-to-sync-up-local-changes]]
 Using oc rsync to sync up local changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,11 +167,6 @@ $ oc rsync <source> <destination>
 If you're familiar with the http://linux.die.net/man/1/rsync[`rsync`]
 command, `oc rsync` is just `rsync` tailored for OpenShift use.
 
-'''''
-
-All done! You should now be able to access your Node.js application by
-visiting its URL.
-
 [[example-use-of-oc-rsync]]
 Example use of oc rsync
 +++++++++++++++++++++++
@@ -176,8 +178,11 @@ application. The following command will sync any locally updated files
 to the remote instance of your app:
 
 -------------------------------------
-$ oc rsync . my-app:/opt/app-root/src
+$ oc rsync . <pod-id>:/opt/app-root/src
 -------------------------------------
+
+Be sure to replace <pod-id> with the desired destination pod's id.
+You can find out your pod's id with the command `oc describe pods`.
 
 The openshift/nodejs-010-centos7 image puts your source code in the
 directory _/opt/app-root/src_, so this directory mimics the root
