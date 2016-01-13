@@ -14,7 +14,7 @@ development mode is _hot deploy_. This blog post will demonstrate how
 you can get the most out of this recently introduced feature.
 
 This blog post first shows you how to run a Node.js application on
-OpenShift using the sti-nodejs image, then how to run an app in
+OpenShift using the sti-nodejs image, then how to run an application in
 development mode, and then shows you how to integrate the hot deploy
 feature, in tandem with `oc rsync`, with JavaScript command line tools
 like Grunt and Gulp.
